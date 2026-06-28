@@ -1,0 +1,10 @@
+name = "monoids"
+version = "0.1.0"
+defaultTargets = ["monoids"]
+
+[[lean_lib]]
+name = "Monoids"
+
+[[lean_exe]]
+name = "monoids"
+root = "Main"
