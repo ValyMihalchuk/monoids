@@ -11,6 +11,61 @@ def vappend : Vec a m → Vec a n → Vec a (n + m)
   | Vec.nil, ys => ys
   |(Vec.cons x xs), ys => Vec.cons x (vappend xs ys)
 
+def vappend' : Vec a m → Vec a n → Vec a (m + n)
+  | Vec.nil, ys => Eq.mpr (by simp) ys
+  |(Vec.cons x xs), ys => Eq.mpr (by grind) (Vec.cons x (vappend xs ys))
+
+theorem cons_cast_tail_mpr
+    {i j : Nat}
+    (h : i = j)
+    (x : α)
+    (xs : Vec α j) :
+    Eq.mpr (congrArg (Vec α) (congrArg (fun k => k + 1) h)) (Vec.cons x xs)
+      =
+    Vec.cons x (Eq.mpr (congrArg (Vec α) h) xs) := by
+  cases h
+  rfl
+
+theorem vappend_nil_cons (x : α) {n : Nat} (xs : Vec α n) :
+    vappend .nil (Vec.cons x xs) = Vec.cons x (vappend .nil xs) := by
+  unfold vappend
+  rfl
+
+theorem vappend'_nil_cons (x : α) {n : Nat} (xs : Vec α n) :
+    vappend' .nil (Vec.cons x xs) = Vec.cons x (vappend' .nil xs) := by
+  unfold vappend'
+  calc
+    Eq.mpr (by simp : Vec α (0 + (n + 1)) = Vec α (n + 1)) (Vec.cons x xs)
+        = Eq.mpr
+            (congrArg (Vec α) (congrArg (fun k => k + 1) (show 0 + n = n by simp)))
+            (Vec.cons x xs) := by
+            rfl
+    _ = Vec.cons x (Eq.mpr (by simp : Vec α (0 + n) = Vec α n) xs) := by
+            rw [cons_cast_tail_mpr (show 0 + n = n by simp) x xs]
+
+
+
+theorem simple_painful
+    {β : Type v}
+    (observe : {k : Nat} → Vec α k → β)
+    {n : Nat}
+    (xs : Vec α n)
+    (expected : β)
+    (p : observe xs = expected) :
+    observe (vappend' .nil xs) = expected :=
+by
+  induction xs generalizing observe expected with
+  | nil =>
+      simpa [vappend'] using p
+  | cons x xs ih =>
+      rw [vappend'_nil_cons]
+      exact ih (fun {k} ys => observe (Vec.cons x ys)) expected p
+
+
+
+
+
+
 theorem cons_cast_tail
     {i j : Nat}
     (h : i = j)
