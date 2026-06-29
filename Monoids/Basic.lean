@@ -109,6 +109,7 @@ theorem dplus_correct (n m : Nat) :
 def dsucc (m : DNat) : DNat :=
   fun n => m (n + 1)
 
+/-
 def revAcc'''
     (m n : DNat) :
     Vec a (reify n) → Vec a (reify m) → Vec a (reify (dplus m n))
@@ -129,7 +130,7 @@ def revAcc'
     Vec a n → Vec a (reify m) → Vec a (m n)
   | Vec.nil, acc => acc
   | Vec.cons x xs, acc => revAcc' (dsucc m) xs (Vec.cons x acc)
-
+-/
 def revAcc
     (m : DNat)
     (cons : {k : Nat} → a → Vec a (m k) → Vec a ((dsucc m) k)) :
