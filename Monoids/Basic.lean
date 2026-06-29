@@ -75,13 +75,14 @@ def revAccCast : Vec a m → Vec a n → Vec a (n + m)
 def DNat := Nat → Nat
 
 def denote (n : Nat) : DNat :=
-  fun m => m + n
+  fun m => n + m
 
 def reify (m : DNat) : Nat :=
   m 0
 
 theorem reify_correct (n : Nat) : reify (denote n) = n := by
-  simp [reify, denote]
+  unfold reify denote
+  rfl
 
 def dzero : DNat :=
   fun x => x
@@ -103,8 +104,9 @@ theorem dplus_assoc (x y z : DNat) :
   rfl
 
 theorem dplus_correct (n m : Nat) :
-    n + m = reify (dplus (denote n) (denote m)) := by
+    m + n = reify (dplus (denote n) (denote m)) := by
   simp [reify, dplus, denote]
+
 
 def dsucc (m : DNat) : DNat :=
   fun n => m (n + 1)
@@ -123,7 +125,10 @@ def revAcc''
   | Vec.cons x xs, acc => revAcc'' (dsucc m) xs (Vec.cons x acc)
 
 example (m : DNat):
- reify (dplus (denote n) m) = m n := by simp[reify, dplus, denote]
+ reify (dplus (denote n) m) = m n := by
+ unfold reify dplus denote
+ rfl
+
 
 def revAcc'
     (m : DNat) :
