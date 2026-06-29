@@ -67,10 +67,9 @@ def slowReverse : Vec a n → Vec a n
 | Vec.nil => Vec.nil
 | (Vec.cons x xs) => snoc (slowReverse xs) x
 
-
 def revAccCast : Vec a m → Vec a n → Vec a (n + m)
 | Vec.nil, acc => acc
-| (Vec.cons x xs), acc => Eq.mp (congrArg (Vec a) (by grind)) (revAccCast xs (Vec.cons x acc))
+| Vec.cons x xs, acc => Eq.mp (congrArg (Vec a) (by grind)) (revAccCast xs (Vec.cons x acc))
 
 
 def DNat := Nat → Nat
@@ -110,6 +109,27 @@ theorem dplus_correct (n m : Nat) :
 def dsucc (m : DNat) : DNat :=
   fun n => m (n + 1)
 
+def revAcc'''
+    (m n : DNat) :
+    Vec a (reify n) → Vec a (reify m) → Vec a (reify (dplus m n))
+  | Vec.nil, acc => acc
+  | Vec.cons x xs, acc => revAcc''' (succ m) xs (Cons x ys)
+
+def revAcc''
+    (m : DNat) :
+    Vec a n → Vec a (reify m) → Vec a (reify (dplus (denote n) m))
+  | Vec.nil, acc => acc
+  | Vec.cons x xs, acc => revAcc'' (dsucc m) xs (Vec.cons x acc)
+
+example (m : DNat):
+ reify (dplus (denote n) m) = m n := by simp[reify, dplus, denote]
+
+def revAcc'
+    (m : DNat) :
+    Vec a n → Vec a (reify m) → Vec a (m n)
+  | Vec.nil, acc => acc
+  | Vec.cons x xs, acc => revAcc' (dsucc m) xs (Vec.cons x acc)
+
 def revAcc
     (m : DNat)
     (cons : {k : Nat} → a → Vec a (m k) → Vec a ((dsucc m) k)) :
@@ -141,6 +161,16 @@ theorem dappend_snoc
   | cons z zs ih =>
       grind [snoc, dappend]
 
+
+theorem dappend_dzero_nil
+    (xs : Vec a n) :
+    dappend dzero (fun x xs => Vec.cons x xs) xs Vec.nil = xs := by
+  induction xs with
+  | nil =>
+      rfl
+  | cons x xs ih =>
+      grind [dappend]
+
 theorem revAcc_correct
     (m : DNat)
     (xs : Vec a n)
@@ -153,14 +183,6 @@ theorem revAcc_correct
   | cons x xs ih =>
       grind [revAcc, slowReverse, dappend_snoc]
 
-theorem dappend_dzero_nil
-    (xs : Vec a n) :
-    dappend dzero (fun x xs => Vec.cons x xs) xs Vec.nil = xs := by
-  induction xs with
-  | nil =>
-      rfl
-  | cons x xs ih =>
-      grind [dappend]
 
 theorem vreverse_correct (xs : Vec a n) :
     vreverse xs = slowReverse xs := by
