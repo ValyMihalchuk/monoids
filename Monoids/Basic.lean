@@ -24,10 +24,9 @@ def vappend'' : Vec a m → Vec a n → Vec a (m + n)
   | Vec.cons x xs, ys => Vec.cons x (vappend xs ys)
 -/
 
-
 def vappend' : Vec a m → Vec a n → Vec a (m + n)
-  | Vec.nil, ys => Eq.mpr (by simp) ys
-  | Vec.cons x xs, ys => Eq.mpr (by grind) (Vec.cons x (vappend xs ys))
+  | Vec.nil, ys => cast (by simp) ys
+  | Vec.cons x xs, ys => cast (by grind) (Vec.cons x (vappend xs ys))
 
 
 theorem vappend'_nil_cons (x : α) {n : Nat} (xs : Vec α n) :
@@ -67,9 +66,9 @@ def slowReverse : Vec a n → Vec a n
 | Vec.nil => Vec.nil
 | (Vec.cons x xs) => snoc (slowReverse xs) x
 
-def revAccCast : Vec a m → Vec a n → Vec a (n + m)
+def revAcc' : Vec a m → Vec a n → Vec a (n + m)
 | Vec.nil, acc => acc
-| Vec.cons x xs, acc => Eq.mp (congrArg (Vec a) (by grind)) (revAccCast xs (Vec.cons x acc))
+| Vec.cons x xs, acc => revAcc' xs (Vec.cons x acc)
 
 
 def DNat := Nat → Nat
